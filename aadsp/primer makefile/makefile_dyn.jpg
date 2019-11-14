@@ -1,0 +1,28 @@
+CC = gcc
+CFLAGS = -c -O0 -g3 -Wall -fmessage-length=0 -MMD -MP
+INCLUDE_PATH = -I inc -I libinc 
+LIBRARY_PATH = -L build
+OBJS = build/cipher.o build/librot13.so build/libvigenere.so build/libceasar.so
+LIBS = -lrot13 -lvigenere -lceasar
+LD_LIBRARY_PATH="$LD_LIBRARY_PATH":"$PWD"/build
+export LD_LIBRARY_PATH
+
+all: ${OBJS} app
+
+clean:
+	rm -f build/*.o
+	rm -f build/*.so
+	rm -f build/*.a
+
+build/lib%.so: build/%.o
+	${CC} --shared -o $@ $<
+
+build/%.o: libsrc/%.c
+	${CC} ${CFLAGS} -fpic ${INCLUDE_PATH} $< -o $@
+
+build/cipher.o: src/cipher.c
+	${CC} ${CFLAGS} -MF"build/cipher.d" -MT"build/cipher.d" ${INCLUDE_PATH} $< -o $@
+
+app:
+	${CC} -o $@ build/cipher.o ${LIBRARY_PATH} ${LIBS}
+
