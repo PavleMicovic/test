@@ -1,0 +1,25 @@
+CC = gcc
+AR = ar
+CFLAGS = -c -O0 -g3 -Wall -fmessage-length=0 -MMD -MP
+INCLUDE_PATH = -I inc -I libinc 
+LIBRARY_PATH = -L build
+OBJS = build/cipher.o build/librot13.a build/libvigenere.a build/libceasar.a
+LIBS = -lrot13 -lvigenere -lceasar
+
+all: ${OBJS} app
+
+clean:
+	rm -f build/*.o
+	rm -f build/*.a
+
+build/lib%.a: build/%.o
+	${AR} -r $@ $<	
+
+build/%.o: libsrc/%.c
+	${CC} ${CFLAGS} ${INCLUDE_PATH} $< -o $@
+
+build/cipher.o: src/cipher.c
+	${CC} ${CFLAGS} -MF"build/cipher.d" -MT"build/cipher.d" ${INCLUDE_PATH} $< -o $@
+
+app:
+	${CC} -o $@ build/cipher.o ${LIBRARY_PATH} ${LIBS} --static
